@@ -1,8 +1,7 @@
-import re
 import os
 import streamlit as st
 from langchain_community.document_loaders import WebBaseLoader, YoutubeLoader, CSVLoader,PyPDFLoader, TextLoader
-from youtube_transcript_api import YouTubeTranscriptApi
+from langchain_community.document_loaders import YoutubeLoader
 from fake_useragent import UserAgent
 from time import sleep
 
@@ -24,21 +23,17 @@ def carregar_site(url):
     return documento
 
 def carregar_youtube(url):
-    video_id = None
-    match = re.search(r"v=([a-zA-Z0-9_-]+)", url)
-    if match:
-        video_id = match.group(1)
-    else:
-        st.error('Não foi possível extrair o ID do vídeo da URL.')
-        st.stop()
     try:
-        transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-        transcript = transcript_list.find_transcript(['pt'])
-        entries = transcript.fetch()
-        documento = "\n\n".join(entry.text for entry in entries)
-        return documento
+        loader = YoutubeLoader.from_youtube_url(
+            youtube_url=url,
+            add_video_info=False,
+            language=['pt']
+        )
+        documentos = loader.load()
+        texto = '\n\n'.join([doc.page_content for doc in documentos])
+        return texto
     except Exception as e:
-        st.error(f"Erro ao carregar a transcrição do vídeo: {str(e)}")
+        st.error(f"Erro ao carregar a transcrição do vídeo: {e}")
         st.stop()
 
 def carregar_csv(caminho):

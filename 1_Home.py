@@ -83,12 +83,13 @@ def home_page():
         chat = st.chat_message('human')
         chat.markdown(input_usuario)
 
-        chat = st.chat_message('ai')
-
         resposta = chain.invoke({'input': input_usuario, 'chat_history': mensagens.buffer_as_messages}).content
         mensagens.chat_memory.add_ai_message(resposta)
 
         st.session_state['memoria'] = mensagens
+
+        chat = st.chat_message('ai')
+        chat.markdown(resposta)
 
 def sidebar():
     tabs = st.tabs(['Upload de Arquivo', 'Seleção de Modelos'])
